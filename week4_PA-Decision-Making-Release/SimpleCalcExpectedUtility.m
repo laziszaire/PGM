@@ -22,14 +22,26 @@ function EU = SimpleCalcExpectedUtility(I)
   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
+  
+  % get p: marginals for parent of U 
   all_var = [F.var];
-  Z = setdiff(all_var,U.var);
-  Fnew = VariableElimination(F, Z);%variable elimination: remove all the variable that is not in Utility factor
-  prod = Fnew(1);
-  for i = 2:length(Fnew)
-      prod = FactorProduct(prod, Fnew(i));%prod.val is probablity of assignments in Utility factor
-  end
-  EU = FactorProduct(prod,U);
+  Z = setdiff(all_var,U.var); 
+  Fnew = VariableElimination(F, Z); % variable elimination: remove all the variable that is not in Utility factor                                                        
+  p_U = FacotorsProduct(Fnew); %  prod.val is probablity of assignments in Utility factor
+  
+  % expectation: U*p
+  EU = FactorProduct(p_U,U);    
   EU = sum(EU.val);
   
+end
+
+
+function prod = FacotorsProduct(Flist)
+% factor product of a list of factor
+% can be use to get a joint
+
+prod = Flist(1);
+  for i = 2:length(Flist)
+      prod = FactorProduct(prod, Flist(i));%prod.val is probablity of assignments in Utility factor
+  end
 end
