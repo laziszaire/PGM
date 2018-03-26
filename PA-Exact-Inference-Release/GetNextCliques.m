@@ -39,15 +39,22 @@ received = reshape(cellfun(@(a) ~isempty(a),{messages.var}),size(messages));
 for i=1:Nclique
     for j = 1:Nclique
         %1. linked
-        linked = edges(i,j)>0;
+        % 能传
+        linked = edges(i,j)>0; %i,j之间是有连接的,他们之间存在交集
         %if ~linked, continue,end
+        
+        
         %2 j not received message from i
-        not_received = ~received(i,j);
+        % 没传过
+        not_received = ~received(i,j); %j之前没有收到过i的信息
         %if ~not_received, continue,end
+        
         %3. i received all messages expect j
         expectj = setdiff(find(edges(:,i)>0),j);
         %ready = all(message_not_empty(expectj,i)) && ~message_not_empty(j,i);
-        % i收到了除了j以外的所有节点的message,收没收到j不要求
+        % 我有
+        % i收到了所有下游信息
+        % 上下游相对的，如果i要传递信息到j，此时，j为i的上游；而如果i要传递信息到其他非j节点，此时j为i的下游。
         ready = all(received(expectj,i));
         ready = linked && not_received && ready;
         if ready, break,end
