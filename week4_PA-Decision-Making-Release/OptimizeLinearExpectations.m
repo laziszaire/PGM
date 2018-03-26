@@ -1,6 +1,6 @@
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-function [MEU OptimalDecisionRule_f] = OptimizeLinearExpectations( I )
+function [MEU, OptimalDecisionRule_f] = OptimizeLinearExpectations( I )
   % Inputs: An influence diagram I with a single decision node and one or more utility nodes.
   %         I.RandomFactors = list of factors for each random variable.  These are CPDs, with
   %              the child variable = D.var(1)
@@ -32,11 +32,13 @@ function [MEU OptimalDecisionRule_f] = OptimizeLinearExpectations( I )
   for i = 1:length(U)
     euf(i) = eU_D(U(i),D,R);
   end
-    euf = FactorsSum(euf);
-    [MEU,OptimalDecisionRule_f] = cal_OptimalDecisionRule(euf,D);
+    sumeuf = FactorsSum(euf);% U
+    [MEU,OptimalDecisionRule_f] = cal_OptimalDecisionRule(sumeuf,D); % argmaxp(U*p); p is decision
 end
 
 function euf = eU_D(Ui,D,R)
+% expected utility factor
+
 F = [Ui,R];
 all_var = [F.var];
 Z = setdiff(all_var,D.var);

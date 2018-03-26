@@ -24,22 +24,32 @@ D = I.DecisionFactors(1);
 %     has no parents.
 % 2.  You may find the Matlab/Octave function setdiff useful.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
 EUF = CalculateExpectedUtilityFactor( I );
-assigns = assignments_F(EUF);
-index = D.var(1) ~= EUF.var;% parent joint
-parents_assig = assigns(:,index);
-[~,~,ic] = unique(parents_assig,'rows');
-uc = unique(ic);
 OptimalDecisionRule_.var  = EUF.var;
 OptimalDecisionRule_.card  = EUF.card;
 OptimalDecisionRule_.val  = 0*(1:prod(EUF.card));
-Indx = 1:length(ic);
-for i = 1:length(uc);
-    index1 = ic == uc(i);
-    [~,idx]= max(EUF.val(index1));%
-    a = Indx(index1);
-    OptimalDecisionRule_.val(a(idx)) = 1;
+
+
+assigns = assignments_F(EUF);
+index = D.var(1) ~= EUF.var;% parent joint
+parents_assig = assigns(:,index);
+
+[~,~,group_id] = unique(parents_assig,'rows'); % 按D的parent分组,group_id
+uc = unique(group_id);
+Indx = 1:length(group_id);
+
+for i = 1:length(uc)
+    index1 = group_id == uc(i);
+    grp_origin_index = Indx(index1); % 原始index
+    grp_value = EUF.val(index1);
+    [~,ingrp_idx]= max(grp_value);% ingrp_idx of max in grp
+    max_idx = grp_origin_index(ingrp_idx);
+    OptimalDecisionRule_.val(max_idx) = 1;
 end
+
+% expectation
 a = FactorProduct(EUF,OptimalDecisionRule_);
 MEU = sum(a.val);
 end

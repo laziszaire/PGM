@@ -22,8 +22,9 @@ D = I.DecisionFactors;
 R = I.RandomFactors;
 U = I.UtilityFactors;
 all_var = unique([R.var,U.var]);
-Z = setdiff(all_var,D.var);
+Z = setdiff(all_var,D.var); % only parents of D and  D left
 Fall = [R,U];
-Fall = VariableElimination(Fall,Z);
-EUF = FactorsProduct(Fall);
+Fall = VariableElimination(Fall,Z); % expected U of each assignment, conditional
+EUF = FactorsProduct(Fall); % U of each assignment of [D.var]
+
 end  
