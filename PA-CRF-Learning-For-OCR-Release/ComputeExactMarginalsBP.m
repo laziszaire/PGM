@@ -23,7 +23,7 @@ function M = ComputeExactMarginalsBP(F, E, isMax)
 % Create a clique tree, compute the initial potentails, calibrate the
 % clique tree, and find the belief for each varaible at a clique that has
 % that variable in its scope
-compressedCliqueTree = CreateCliqueTree(F, E);
+compressedCliqueTree = CreateCliqueTree(F);
 PCalibrated = CliqueTreeCalibrate(compressedCliqueTree, isMax);
 varsList = unique([F(:).var]);
 M = repmat(struct('var', 0, 'card', 0, 'val', []), length(varsList), 1);

@@ -19,7 +19,7 @@
 %
 % Copyright (C) Daphne Koller, Stanford Univerity, 2012
 
-function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
+function [nll, grad, MAP] = InstanceNegLogLikelihood(X, y, theta, modelParams)
 
 % featureSet is a struct with two fields:
 %    .numParams - the number of parameters in the CRF (this is not numImageFeatures
@@ -67,7 +67,8 @@ features = featureSet.features;
 factors = features2factors(features,modelParams,theta);
 CliqueTree = CreateCliqueTree(factors); % F is array of factors, it is only to be a chain.
 [CliqueTree, logZ] = CliqueTreeCalibrate(CliqueTree,0);
-
+M = ComputeExactMarginalsBP(factors, [], 1);
+MAP = MaxDecoding( M );
 %nll
 [features_val,theta_] = weighted_feature_counts(y,features,theta);% The weighted feature counts
 nll_f = features_val(:)'*theta_(:); %ÌØÕ÷Ïî
