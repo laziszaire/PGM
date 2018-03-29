@@ -69,8 +69,7 @@ CliqueTree = CreateCliqueTree(factors); % F is array of factors, it is only to b
 [CliqueTree, logZ] = CliqueTreeCalibrate(CliqueTree,0);
 
 %nll
-[features_val,theta_] = weighted_feature_counts(y,features,theta);% The weighted feature counts
-nll_f = features_val(:)'*theta_(:); %特征项
+[nll_f,features_val] = weighted_feature_counts(y,features,theta);% The weighted feature counts
 nll_reg = .5*modelParams.lambda*sum(theta.^2); %正则化项
 nll = logZ - nll_f + nll_reg;
 
@@ -92,17 +91,17 @@ Nf = numel(features);
 factors = repmat(EmptyFactorStruct(),Nf,1);% one feature, one factor
 
 for i = 1:Nf
-    factors(i).var = features(i).var;
+    factors(i).var = features(i).var;% Y or the class label
     factors(i).card = ones(1,numel(features(i).var))*modelParams.numHiddenStates;
     a = zeros(prod(factors(i).card));
     factors(i).val = exp(a);
-    val_indicator_assingment = exp(theta(features(i).paramIdx)*1);
-    factors(i) = SetValueOfAssignment(factors(i),features(i).assignment,val_indicator_assingment);
+    val_of_indicator_assingment = exp(theta(features(i).paramIdx)*1);
+    factors(i) = SetValueOfAssignment(factors(i),features(i).assignment,val_of_indicator_assingment);
 end
 
 end
 
-function [features_val,theta_] = weighted_feature_counts(Y,features,theta)
+function [wfc,features_val] = weighted_feature_counts(Y,features,theta)
 %parameter sharing: size(features) != size(theta)
 
 % theta_
@@ -110,8 +109,9 @@ theta_ = theta([features.paramIdx]);
 
 
 % features 值是多少啊？和Y有关
-fh =@(var,assi) all(Y(var)==assi);
-features_val = cellfun(fh,{features.var},{features.assignment});
+fh =@(var,assi) all(Y(var)==assi); %这里用到的都是indicator函数
+features_val = cellfun(fh,{features.var},{features.assignment}); %是个向量，features_val_matrix(y=i,:)的一行,是给定y: p(y=Y(feature.var)|X,theta)
+wfc = features_val(:)'*theta_(:);
 end
 
 function mefc = model_expected_feature_counts(CliqueTree,features,numParams)
@@ -126,11 +126,12 @@ for i = 1:Nf
         end
     end
     var_eli = setdiff(clique_.var,features(i).var);
-    Clique_margin = FactorMarginalization(clique_,var_eli);
+    Clique_margin = FactorMarginalization(clique_,var_eli); %feature_factor中对应每个assignment的概率
+    
     %p
     prob = Clique_margin.val/sum(Clique_margin.val);
     
-    %f
+    %feature
     aindx = AssignmentToIndex(features(i).assignment,Clique_margin.card);
     features_v = 0*prob;
     features_v(aindx) = 1;
@@ -138,7 +139,7 @@ for i = 1:Nf
     %expectation
     expectation = prob(:)'*features_v(:);
     
-    mefc(features(i).paramIdx) =  mefc(features(i).paramIdx) + expectation;
+    mefc(features(i).paramIdx) =  mefc(features(i).paramIdx) + expectation; %parameter sharing
 end
 end
 
