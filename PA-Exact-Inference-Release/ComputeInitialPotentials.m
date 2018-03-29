@@ -49,21 +49,27 @@ end
 %% subfunc
 function [clique,flist] = clique_init(node,flist,flist_all)
 %init the clique
+
 clique.var = node;
 for i = 1:numel(clique.var)
+    % 找出flist中所有可属于该clique的factor
+    % family preservation: 如果factor的var有一个属于clique,那整个factor也属于这个clique
+    %                      clique中含有factor中的一个var,那clique就包含该factor中的所有var。 有一个就有全部
     for j = 1:numel(flist_all)
         idx = (clique.var(i) == flist_all(j).var);
         if any(idx)
          clique.card(i) = flist_all(j).card(idx);
-         break;
+         break; %
         end
     end
 end
-clique.val = ones(1,prod(clique.card));%init clique to all 1s
+clique.val = ones(1,prod(clique.card));% init clique to all 1s, 平凡的clique
+
+% 每个factor只用1次
 if isempty(flist),return,end
 to_del = [];
 for fi = 1:numel(flist)
-    if all(ismember(flist(fi).var,clique.var))
+    if all(ismember(flist(fi).var,clique.var)) % factor中的所有var包含于clique的var
         clique = ComputeJointDistribution([clique;flist(fi)]);
         to_del(end+1)=fi;
     end

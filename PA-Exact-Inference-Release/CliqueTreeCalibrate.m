@@ -47,9 +47,9 @@ switch isMax
     case 0
         [i,j] = GetNextCliques(P,MESSAGES);
         while i>0.1
-            m2send = MESSAGES(setdiff(find(P.edges(:,i)>0),j),i);% message to send, do not send back message from j
+            m_downs = MESSAGES(setdiff(find(P.edges(:,i)>0),j),i);% message to send, do not send back message from j
             init = P.cliqueList(i);
-            prod_ = combine_message_init(m2send,init);
+            prod_ = combine_message_init(m_downs,init);
             sepset = intersect(P.cliqueList(i).var,P.cliqueList(j).var); %empty sepset?
             message = FactorMarginalization(prod_, setdiff(prod_.var,sepset));
             message.val = message.val/sum(message.val); %normalize
@@ -77,11 +77,11 @@ switch isMax
         for ii = 1:numel(P.cliqueList),P.cliqueList(ii).val = log(P.cliqueList(ii).val);end
         %2. cal message
         while i>0.1
-            m2send = MESSAGES(setdiff(find(P.edges(:,i)>0),j),i);% message to send, do not send back message from j
+            m_downs = MESSAGES(setdiff(find(P.edges(:,i)>0),j),i);% message to send, do not send back message from j
             init = P.cliqueList(i);
-            sum_ = combine_message_init(m2send,init,isMax);
+            sum_ = combine_message_init(m_downs,init,isMax); % 接收下游信息
             sepset = intersect(P.cliqueList(i).var,P.cliqueList(j).var); %
-            message = FactorMaxMarginalization(sum_, setdiff(sum_.var,sepset));
+            message = FactorMaxMarginalization(sum_, setdiff(sum_.var,sepset)); % 发出信息
             MESSAGES(i,j) = message;
             [i,j] = GetNextCliques(P,MESSAGES);
         end

@@ -40,4 +40,20 @@ load Part2Sample
 % parameter sharing
 [nll, grad] = InstanceNegLogLikelihood(sampleX, sampleY, sampleTheta, sampleModelParams);
 
-
+%% train and test
+load Part2FullDataset.mat
+load Part2Sample
+%theta = zeros(1,2366);
+load theta
+ni = numel(trainData);
+maxiter = 100;
+iter = 1;
+while iter<maxiter
+    idx = randi(ni,1);
+    [nll, grad,MAP] = InstanceNegLogLikelihood(trainData(idx).X, trainData(idx).y, theta, sampleModelParams);
+    DecodedMarginalsToChars(trainData(idx).y)
+    DecodedMarginalsToChars(MAP)
+    alpha = 1/(1+0.05*iter);
+    theta = theta(:) - alpha*grad(:);
+    iter = iter + 1;
+end
